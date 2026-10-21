@@ -86,6 +86,42 @@ export default function Home() {
     setSuccess("");
   }
 
+  async function handleDelete(id: number, name: string) {
+    const confirmed = window.confirm(
+      `Are you sure you want to delete ${name}?`
+    );
+
+    if (!confirmed) return;
+
+    try {
+      setError("");
+      setSuccess("");
+
+      const response = await fetch(`/api/employees/${id}`, {
+        method: "DELETE",
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.message || "Unable to delete employee.");
+      }
+
+      if (editingId === id) {
+        cancelEditing();
+      }
+
+      setSuccess("Employee deleted successfully.");
+      await loadEmployees();
+    } catch (error) {
+      setError(
+        error instanceof Error
+          ? error.message
+          : "Unable to delete employee."
+      );
+    }
+  }
+
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
@@ -300,13 +336,23 @@ export default function Home() {
                         })}
                       </td>
                       <td className="p-4">
-                        <button
-                          type="button"
-                          onClick={() => startEditing(employee)}
-                          className="font-medium text-blue-600 hover:underline"
-                        >
-                          Edit
-                        </button>
+                        <div className="flex items-center gap-4">
+                          <button
+                            type="button"
+                            onClick={() => startEditing(employee)}
+                            className="font-medium text-blue-600 hover:underline"
+                          >
+                            Edit
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => handleDelete(employee.id, employee.name)}
+                            className="font-medium text-red-600 hover:underline"
+                          >
+                            Delete
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}

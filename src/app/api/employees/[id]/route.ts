@@ -108,3 +108,54 @@ export async function PUT(
     );
   }
 }
+
+export async function DELETE(
+  request: Request,
+  context: RouteContext
+) {
+  try {
+    const { id: rawId } = await context.params;
+
+    if (!/^[1-9]\d*$/.test(rawId)) {
+      return NextResponse.json(
+        { message: "Invalid employee ID" },
+        { status: 400 }
+      );
+    }
+
+    const id = Number(rawId);
+
+    if (!Number.isSafeInteger(id)) {
+      return NextResponse.json(
+        { message: "Invalid employee ID" },
+        { status: 400 }
+      );
+    }
+
+    const result = await pool.query(
+      `DELETE FROM employees
+       WHERE id = $1
+       RETURNING id, name`,
+      [id]
+    );
+
+    if (result.rowCount === 0) {
+      return NextResponse.json(
+        { message: "Employee not found" },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({
+      message: "Employee deleted successfully",
+      employee: result.rows[0],
+    });
+  } catch (error) {
+    console.error("Failed to delete employee:", error);
+
+    return NextResponse.json(
+      { message: "Failed to delete employee" },
+      { status: 500 }
+    );
+  }
+}
