@@ -29,6 +29,7 @@ const initialForm: EmployeeForm = {
 
 export default function Home() {
   const [employees, setEmployees] = useState<Employee[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
   const [form, setForm] = useState<EmployeeForm>(initialForm);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
@@ -171,6 +172,17 @@ export default function Home() {
     }
   }
 
+  const filteredEmployees = employees.filter((employee) => {
+    const query = searchTerm.trim().toLowerCase();
+
+    return (
+      employee.name.toLowerCase().includes(query) ||
+      employee.email.toLowerCase().includes(query) ||
+      employee.department.toLowerCase().includes(query) ||
+      employee.position.toLowerCase().includes(query)
+    );
+  });
+
   return (
     <main className="min-h-screen bg-gray-50 p-6 text-gray-900 md:p-10">
       <div className="mx-auto max-w-6xl">
@@ -297,14 +309,32 @@ export default function Home() {
         <section className="overflow-hidden rounded-xl border bg-white shadow-sm">
           <div className="border-b p-5">
             <h2 className="text-xl font-semibold">Employee List</h2>
-            <p className="mt-1 text-sm text-gray-500">
+            <p className="mb-5 mt-1 text-sm text-gray-500">
               Total employees: {employees.length}
             </p>
+
+            <div className="mb-5">
+              <label
+                htmlFor="employee-search"
+                className="mb-2 block text-sm font-medium"
+              >
+                Search Employees
+              </label>
+
+              <input
+                id="employee-search"
+                type="search"
+                value={searchTerm}
+                onChange={(event) => setSearchTerm(event.target.value)}
+                placeholder="Search by name, email, department, or position..."
+                className="w-full rounded-lg border border-gray-300 px-4 py-3 outline-none focus:border-blue-500"
+              />
+            </div>
           </div>
 
           {loading ? (
             <p className="p-6">Loading employees...</p>
-          ) : employees.length === 0 ? (
+          ) : filteredEmployees.length === 0 ? (
             <p className="p-6 text-gray-600">No employees found.</p>
           ) : (
             <div className="overflow-x-auto">
@@ -321,7 +351,7 @@ export default function Home() {
                   </tr>
                 </thead>
                 <tbody className="divide-y">
-                  {employees.map((employee) => (
+                  {filteredEmployees.map((employee) => (
                     <tr key={employee.id}>
                       <td className="p-4">{employee.id}</td>
                       <td className="p-4 font-medium">{employee.name}</td>
