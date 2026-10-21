@@ -1,36 +1,87 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+Here is a short, crisp, and clean markdown section ready to add to your [`README.md`](file:///d:/EMS/employee-management/README.md):
 
-## Getting Started
+```markdown
+## API Documentation & Testing
 
-First, run the development server:
+Base URL: `http://localhost:3000`
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+### Endpoints
+
+| Method | Endpoint | Description | Status Codes |
+|---|---|---|---|
+| `GET` | `/api/employees` | Fetch all employees | `200`, `500` |
+| `POST` | `/api/employees` | Create a new employee | `201`, `400`, `409`, `500` |
+| `PUT` | `/api/employees/:id` | Update an existing employee | `200`, `400`, `404`, `409`, `500` |
+| `DELETE` | `/api/employees/:id` | Delete an employee by ID | `200`, `400`, `404`, `500` |
+
+---
+
+### Request Payloads (JSON)
+
+#### 1. Create Employee (`POST /api/employees`)
+```json
+{
+  "name": "Priya Sharma",
+  "email": "priya.sharma@example.com",
+  "department": "Human Resources",
+  "position": "HR Executive",
+  "salary": 48000
+}
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+#### 2. Update Employee (`PUT /api/employees/:id`)
+```json
+{
+  "name": "Priya Sharma Updated",
+  "email": "priya.sharma@example.com",
+  "department": "Human Resources",
+  "position": "Senior HR Lead",
+  "salary": 58000
+}
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Quick Test Commands
 
-## Learn More
+#### cURL (Terminal / Command Prompt)
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+# 1. GET all
+curl.exe -s http://localhost:3000/api/employees
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# 2. POST create
+curl.exe -X POST http://localhost:3000/api/employees -H "Content-Type: application/json" -d "{\"name\":\"Priya Sharma\",\"email\":\"priya.sharma@example.com\",\"department\":\"Human Resources\",\"position\":\"HR Executive\",\"salary\":48000}"
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+# 3. PUT update (replace 1 with actual ID)
+curl.exe -X PUT http://localhost:3000/api/employees/1 -H "Content-Type: application/json" -d "{\"name\":\"Priya Sharma Updated\",\"email\":\"priya.sharma@example.com\",\"department\":\"Human Resources\",\"position\":\"Senior HR Lead\",\"salary\":58000}"
 
-## Deploy on Vercel
+# 4. DELETE (replace 1 with actual ID)
+curl.exe -X DELETE http://localhost:3000/api/employees/1
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+#### Browser Console (`F12` -> Console)
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```javascript
+// GET
+fetch("/api/employees").then(r => r.json()).then(console.log);
+
+// POST
+fetch("/api/employees", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ name: "Priya Sharma", email: "priya@example.com", department: "HR", position: "Lead", salary: 48000 })
+}).then(r => r.json()).then(console.log);
+
+// PUT (replace 1 with ID)
+fetch("/api/employees/1", {
+  method: "PUT",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ name: "Priya Sharma Updated", email: "priya@example.com", department: "HR", position: "Director", salary: 60000 })
+}).then(r => r.json()).then(console.log);
+
+// DELETE (replace 1 with ID)
+fetch("/api/employees/1", { method: "DELETE" }).then(r => r.json()).then(console.log);
+```
+```
+*
