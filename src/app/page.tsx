@@ -30,6 +30,7 @@ const initialForm: EmployeeForm = {
 export default function Home() {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [form, setForm] = useState<EmployeeForm>(initialForm);
+  const [editingId, setEditingId] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -62,6 +63,29 @@ export default function Home() {
     setForm((current) => ({ ...current, [field]: value }));
   }
 
+  function startEditing(employee: Employee) {
+    setEditingId(employee.id);
+
+    setForm({
+      name: employee.name,
+      email: employee.email,
+      department: employee.department,
+      position: employee.position,
+      salary: String(employee.salary),
+    });
+
+    setSuccess("");
+    setError("");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function cancelEditing() {
+    setEditingId(null);
+    setForm(initialForm);
+    setError("");
+    setSuccess("");
+  }
+
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
@@ -69,25 +93,36 @@ export default function Home() {
     setSaving(true);
 
     try {
-      const response = await fetch("/api/employees", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...form,
-          salary: Number(form.salary),
-        }),
-      });
+      const isEditing = editingId !== null;
+
+      const response = await fetch(
+        isEditing
+          ? `/api/employees/${editingId}`
+          : "/api/employees",
+        {
+          method: isEditing ? "PUT" : "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ...form,
+            salary: Number(form.salary),
+          }),
+        }
+      );
 
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(
-          result.message || "Unable to create employee."
-        );
+        throw new Error(result.message || "Unable to save employee.");
       }
 
       setForm(initialForm);
-      setSuccess("Employee added successfully.");
+      setEditingId(null);
+      setSuccess(
+        isEditing
+          ? "Employee updated successfully."
+          : "Employee added successfully."
+      );
+
       await loadEmployees();
     } catch (err) {
       setError(
@@ -112,7 +147,7 @@ export default function Home() {
 
         <section className="mb-8 rounded-xl border bg-white p-6 shadow-sm">
           <h2 className="mb-5 text-xl font-semibold">
-            Add New Employee
+            {editingId !== null ? "Edit Employee" : "Add New Employee"}
           </h2>
 
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -197,13 +232,29 @@ export default function Home() {
               </p>
             )}
 
-            <button
-              type="submit"
-              disabled={saving}
-              className="rounded-md bg-blue-600 px-5 py-2.5 font-medium text-white hover:bg-blue-700 disabled:opacity-50"
-            >
-              {saving ? "Saving..." : "Add Employee"}
-            </button>
+            <div className="flex flex-wrap gap-3">
+              <button
+                type="submit"
+                disabled={saving}
+                className="rounded-md bg-blue-600 px-5 py-2.5 font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+              >
+                {saving
+                  ? "Saving..."
+                  : editingId !== null
+                    ? "Save Changes"
+                    : "Add Employee"}
+              </button>
+
+              {editingId !== null && (
+                <button
+                  type="button"
+                  onClick={cancelEditing}
+                  className="rounded-md border px-5 py-2.5"
+                >
+                  Cancel
+                </button>
+              )}
+            </div>
           </form>
         </section>
 
@@ -230,6 +281,7 @@ export default function Home() {
                     <th className="p-4">Department</th>
                     <th className="p-4">Position</th>
                     <th className="p-4">Salary</th>
+                    <th className="p-4">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y">
@@ -246,6 +298,15 @@ export default function Home() {
                           currency: "INR",
                           maximumFractionDigits: 2,
                         })}
+                      </td>
+                      <td className="p-4">
+                        <button
+                          type="button"
+                          onClick={() => startEditing(employee)}
+                          className="font-medium text-blue-600 hover:underline"
+                        >
+                          Edit
+                        </button>
                       </td>
                     </tr>
                   ))}
