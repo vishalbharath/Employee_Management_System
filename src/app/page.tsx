@@ -45,7 +45,8 @@ export default function Home() {
         throw new Error("Unable to load employees.");
       }
 
-      const data: Employee[] = await response.json();
+      const json = await response.json();
+      const data: Employee[] = Array.isArray(json) ? json : json.data || [];
       setEmployees(data);
       setError("");
     } catch {
