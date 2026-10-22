@@ -4,10 +4,6 @@ import {
   EmployeeRecord,
 } from "@/lib/validations/employee.schema";
 
-/**
- * Service layer responsible for all Employee database operations.
- * Isolates raw SQL queries from the HTTP transport layer.
- */
 export const employeeService = {
   /**
    * Fetch all employees ordered by newest ID first.
